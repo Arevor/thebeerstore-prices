@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 import sqlite3
 import argparse
 import re
+import logging
+
 
 
 class BeerContainer:
@@ -148,30 +150,112 @@ class Beer:
             return False
 
 
-    def format_rows(self,  prices, quantities, sizes):
-        if len(prices) == len(quantities) == len(sizes):
-            rows, cols = len(prices), 3
-            product_data = [[0 for x in range(cols)] for y in range(rows)]
-            for x in range(0, len(prices)):
-                product_data[x][0] = prices[x]
-                product_data[x][1] = quantities[x]
-                product_data[x][2] = sizes[x]
-            return product_data
-        else:
-            return 'error formatting rows'
+    # def format_rows(self,  prices, quantities, sizes):
+    #     if len(prices) == len(quantities) == len(sizes):
+    #         rows, cols = len(prices), 3
+    #         product_data = [[0 for x in range(cols)] for y in range(rows)]
+    #         for x in range(0, len(prices)):
+    #             product_data[x][0] = prices[x]
+    #             product_data[x][1] = quantities[x]
+    #             product_data[x][2] = sizes[x]
+    #         return product_data
+    #     else:
+    #         return 'error formatting rows'
 
 
 class BeerRetriever:
-    def __init__(self, htmlpage):
-        self.htmlpage = htmlpage
-        self.my_beer = Beer(self.htmlpage)
+    def __init__(self, db_file, htmlpage, log_file):
+        self.my_beer = Beer(htmlpage)
+        self.my_db = Database(db_file)
+        self.name = self.my_beer.Kegs.get_html_title()
 
+        self.htmlpage = htmlpage
+        logging.basicConfig(filename=log_file,
+                            filemode='a',
+                            format='%(asctime)s:%(msecs)d %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.DEBUG)
+        logging.info('--------------------------------------------------')
+        logging.info('Starting import of ' + self.htmlpage)
+
+
+    def retreieve_info(self):
+        vals = self.my_beer.Kegs.get_brewery_info()
+        self.my_db.insert_brewery(self.name, vals[0], vals[1], vals[2])
 
     def retrieve_cans(self):
-        return self.my_beer.get_cans()
+        cans = self.my_beer.get_cans()
+        self.my_db.insert_container(self.name, 'Can', cans)
 
     def retrieve_bottles(self):
-        return self.my_beer.get_bottles()
+        bottles = self.my_beer.get_bottles()
+        self.my_db.insert_container(self.name, 'Bottle', bottles)
 
     def retrieve_kegs(self):
-        return self.my_beer.get_kegs()
+        keg = self.my_beer.get_kegs()
+        self.my_db.insert_container(self.name, 'Keg', keg)
+
+    def retrieve(self):
+        self.retreieve_info()
+        self.retrieve_cans()
+        self.retrieve_bottles()
+        self.retrieve_kegs()
+
+
+class Database:
+
+    def __init__(self, db_file):
+        self.con = sqlite3.connect(db_file)
+        self.c = self.con.cursor()
+
+
+
+    def insert_brewery(self, beer, category, abv, brewery):
+        vals = (beer, category, abv, brewery)
+        try:
+            self.c.execute('''INSERT INTO breweries values(?, ?, ?, ?)''', vals)
+            self.con.commit()
+            logging.info(str(vals) + "added to breweries table")
+        except sqlite3.IntegrityError:
+            logging.info(str(vals) + "NOT added to breweries table-- already exists")
+
+    def insert_container(self, beer, container_type, data):
+        if isinstance(data, bool):
+            return 0
+        data = map(list, zip(*data))
+        if isinstance(data, list):
+            for i in range(0, len(data)):
+
+                data[i].insert(0, beer)
+                data[i].append(container_type)
+                data[i].append(hash(str(data[i])))
+                try:
+                    self.c.execute('''INSERT INTO products values(?, ?, ?, ?,
+                                      ?, ?, CURRENT_TIMESTAMP)''', data[i])
+                    self.con.commit()
+                except sqlite3.IntegrityError:
+                   pass
+        else:
+           print 'Not Available'
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("db_file", help="database file for sqlite3")
+    parser.add_argument("htmlpage", help="page of prices to scan")
+    parser.add_argument("log_file", help="output log file")
+    args = parser.parse_args()
+
+    buddy = BeerRetriever(args.db_file, args.htmlpage, args.log_file)
+
+    buddy.retrieve()
+
+
+
+
+
+
+
+
+
+

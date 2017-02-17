@@ -192,19 +192,19 @@ class TestBeer(unittest.TestCase):
     def test_get_kegs(self):
         pass
 
-class TestBeerRetriever(unittest.TestCase):
+# class TestBeerRetriever(unittest.TestCase):
 
-    def setUp(self):
-        self.amsterdam = BeerRetriever('test_html/test-amsterdam-boneshaker-ipa')
+    # def setUp(self):
+    #     self.amsterdam = BeerRetriever('test_html/test-amsterdam-boneshaker-ipa')
 
 
-    def test_retrieve_cans(self):
-        cans = [[1, 8, 16, 24], [473, 473, 473, 473], [3.15, 24.5, 48.0, 69.0]]
-        self.assertEquals(self.amsterdam.retrieve_cans(), cans)
+    # def test_retrieve_cans(self):
+    #     cans = [[1, 8, 16, 24], [473, 473, 473, 473], [3.15, 24.5, 48.0, 69.0]]
+    #     self.assertEquals(self.amsterdam.retrieve_cans(), cans)
 
-    def test_retrieve_bottles(self):
-        bottles = [[6, 12, 24], [355, 355, 355], [13.25, 27.00, 52.95]]
-        self.assertEquals(self.amsterdam.retrieve_bottles(), bottles)
+    # def test_retrieve_bottles(self):
+    #     bottles = [[6, 12, 24], [355, 355, 355], [13.25, 27.00, 52.95]]
+    #     self.assertEquals(self.amsterdam.retrieve_bottles(), bottles)
 
-    def test_retrieve_kegs(self):
-        self.assertFalse(self.amsterdam.retrieve_kegs())
+    # def test_retrieve_kegs(self):
+    #     self.assertFalse(self.amsterdam.retrieve_kegs())
