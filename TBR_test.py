@@ -1,5 +1,5 @@
 import unittest
-from TBR import BeerContainer, Beer
+from TBR import BeerContainer, Beer, BeerRetriever
 
 # TODO clean up unit testing
 class TestBeerContainer(unittest.TestCase):
@@ -63,7 +63,9 @@ class TestBeer(unittest.TestCase):
         self.carlsbergD = BeerContainer('test_html/TST-carlsberg', 'bottle')
         self.budweiser = BeerContainer('test_html/TST-budweiser', 'can')
         self.pbr = BeerContainer('html_src/pabst-blue-ribbon', 'can')
+        self.pbr2 = BeerContainer('html_src/pabst-blue-ribbon', 'bottle')
         self.am = BeerContainer('test_html/TST-amsterdam-boneshaker-ipa', 'can')
+        self.amB = BeerContainer('test_html/TST-amsterdam-boneshaker-ipa', 'bottle')
         self.CAM = BeerContainer('html_src/camerons-lager', 'can')
         self.CAN = BeerContainer('html_src/canadian', 'bottle')
 
@@ -132,4 +134,47 @@ class TestBeer(unittest.TestCase):
         self.assertEquals(self.PBR.parse_tabletext(pbr_text),
                           (pbr_qty_out, pbr_size_out))
 
+    def test_get_cans(self):
+        pbr_cans = [[1, 2, 4, 6, 6, 12, 12, 24, 24],
+                    [473, 473, 473, 355, 473, 355, 473, 355, 473],
+        [2.15, 4.25, 8.45, 9.5, 12.25, 19.0, 24.45, 37.95, 48.9]]
+        self.assertEquals(self.PBR.get_cans(), pbr_cans)
 
+        am_cans = [[1, 8, 16, 24], [473, 473, 473, 473], [3.15, 24.5, 48.0, 69.0]]
+        self.assertEquals(self.AM.get_cans(), am_cans)
+
+        am_cans = [[1, 8, 16, 24], [473, 473, 473, 473], [3.15, 24.5, 48.0, 69.0]]
+        self.assertEquals(self.AM.get_cans(), am_cans)
+
+    def test_get_bottles(self):
+        # invalid
+        pbr_bots = [[1, 2, 4, 6, 6, 12, 12, 24, 24],
+                    [473, 473, 473, 355, 473, 355, 473, 355, 473],
+        [2.15, 4.25, 8.45, 9.5, 12.25, 19.0, 24.45, 37.95, 48.9]]
+        self.assertFalse(self.PBR.get_bottles())
+
+        # valid
+        self.assertFalse(self.PBR.get_bottles())
+
+        am_bots = [[6, 12, 24], [355, 355, 355], [13.25, 27.00, 52.95]]
+        self.assertEquals(self.AM.get_bottles(), am_bots)
+
+    def test_get_kegs(self):
+        pass
+
+class TestBeerRetriever(unittest.TestCase):
+
+    def setUp(self):
+        self.amsterdam = BeerRetriever('test_html/TST-amsterdam-boneshaker-ipa')
+
+
+    def test_retrieve_cans(self):
+        cans = [[1, 8, 16, 24], [473, 473, 473, 473], [3.15, 24.5, 48.0, 69.0]]
+        self.assertEquals(self.amsterdam.retrieve_cans(), cans)
+
+    def test_retrieve_bottles(self):
+        bottles = [[6, 12, 24], [355, 355, 355], [13.25, 27.00, 52.95]]
+        self.assertEquals(self.amsterdam.retrieve_bottles(), bottles)
+
+    def test_retrieve_kegs(self):
+        self.assertFalse(self.amsterdam.retrieve_kegs())
