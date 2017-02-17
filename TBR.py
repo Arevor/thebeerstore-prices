@@ -19,22 +19,6 @@ class BeerContainer:
             self.soup = 0
             return None
 
-    def add_row(self, price, quantity, size):
-        """ adds a row to BeerContainer
-        :param price: price for given quantity
-        :param quantity:
-        :param size: size of container. 500ml, 473ml, 355ml, etc.
-        :return: last entry in list
-        """""
-        self.rows.append([self.get_html_title(), price, quantity, size])
-        return self.rows[-1]
-
-    def get_rows(self):
-        """
-        :return: all of the rows in this BeerContainer
-        """""
-        return self.rows
-
     def get_html_table(self):
         """
         :return: text for HTML table on BeerContainer's htmlpage
@@ -81,7 +65,7 @@ class Beer:
         self.Bottles = BeerContainer(self.htmlpage, 'bottle')
         self.Kegs = BeerContainer(self.htmlpage, 'keg')
 
-    def gather_raw_rowdata(self, BeerContainer):
+    def get_rawdata(self, BeerContainer):
         """ grabs the text contained inside the HTML table data tags
         :param BeerContainer: to have rows populated
         :return: list of row text, list of row prices
@@ -138,7 +122,7 @@ class Beer:
 
     def get_cans(self):
         try:
-            sizes, prices = self.gather_raw_rowdata(BeerContainer(self.htmlpage, 'can'))
+            sizes, prices = self.get_rawdata(self.Cans)
             sizes, quantities= self.parse_tabletext(sizes)
             prices = self.parse_prices(prices)
             return [sizes, quantities, prices]
@@ -147,7 +131,7 @@ class Beer:
 
     def get_bottles(self):
         try:
-            sizes, prices = self.gather_raw_rowdata(BeerContainer(self.htmlpage, 'bottle'))
+            sizes, prices = self.get_rawdata(self.Bottles)
             sizes, quantities= self.parse_tabletext(sizes)
             prices = self.parse_prices(prices)
             return [sizes, quantities, prices]
@@ -156,7 +140,7 @@ class Beer:
 
     def get_kegs(self):
         try:
-            sizes, prices = self.gather_raw_rowdata(BeerContainer(self.htmlpage, 'keg'))
+            sizes, prices = self.get_rawdata(self.Kegs)
             sizes, quantities= self.parse_tabletext(sizes)
             prices = self.parse_prices(prices)
             return [sizes, quantities, prices]
