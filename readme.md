@@ -12,7 +12,7 @@ wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" http://www.thebeerst
 ```BASH
 for f in html_src/*; do echo "File: ${f}"; python TBR.py ${f} 2>/dev/null; echo  ""; done
 ```
-* write SQL to get what you what from the DB
+* write your own SQL to get what you want from the DB
 
 # Dependencies 
 
